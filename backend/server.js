@@ -8,6 +8,7 @@ import userRoutes from "./routes/userRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
+import couponRoutes from "./routes/couponRoutes.js";
 
 // Load biến môi trường
 dotenv.config();
@@ -36,12 +37,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/admins", adminRoutes);
 app.use("/api/orders", orderRoutes); // <-- Mới
 app.use("/api/upload", uploadRoutes);
-// --- Placeholder cho các Routes sẽ viết tiếp theo ---
-// app.use('/api/products', productRoutes);
-// app.use('/api/users', userRoutes);
-// app.use('/api/admins', adminRoutes);
-// app.use('/api/orders', orderRoutes);
-// app.use('/api/upload', uploadRoutes);
+app.use("/api/coupons", couponRoutes);
 
 // Middleware xử lý lỗi chung (Error Handling)
 app.use((err, req, res, next) => {

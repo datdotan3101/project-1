@@ -49,6 +49,14 @@ const cartSlice = createSlice({
       state.paymentMethod = "PayPal";
       return updateCart(state);
     },
+    saveCoupon: (state, action) => {
+      state.coupon = action.payload; // payload sẽ là { discount: 10, code: 'SALE10' }
+      return updateCart(state);
+    },
+    removeCoupon: (state) => {
+      state.coupon = null;
+      return updateCart(state);
+    },
   },
 });
 
@@ -60,7 +68,9 @@ export const {
   savePaymentMethod,
   clearCartItems,
   resetCart,
-  setCart, // 👈 THÊM DÒNG NÀY VÀO LÀ HẾT LỖI
+  setCart,
+  saveCoupon, 
+  removeCoupon, 
 } = cartSlice.actions;
 
 export default cartSlice.reducer;

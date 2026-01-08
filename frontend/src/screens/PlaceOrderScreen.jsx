@@ -1,18 +1,27 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react"; // Thêm useState
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { Button, Row, Col, ListGroup, Image, Card } from "react-bootstrap";
+import {
+  Button,
+  Row,
+  Col,
+  ListGroup,
+  Image,
+  Card,
+  Form,
+  InputGroup,
+} from "react-bootstrap";
 import { toast } from "react-toastify";
 import axios from "axios";
-import { clearCartItems } from "../slices/cartSlice";
+import { clearCartItems, saveCoupon, removeCoupon } from "../slices/cartSlice"; // Import action mới
 
 const PlaceOrderScreen = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
-  // 1. Lấy state từ Redux (PHẢI KHAI BÁO Ở ĐÂY)
   const cart = useSelector((state) => state.cart);
-  const { userInfo } = useSelector((state) => state.auth); // 👈 Đưa lên đây là chuẩn
+  const { userInfo } = useSelector((state) => state.auth);
+
+  const [couponCode, setCouponCode] = useState(""); // State ô nhập
 
   useEffect(() => {
     if (!cart.shippingAddress.address) {
@@ -22,13 +31,38 @@ const PlaceOrderScreen = () => {
     }
   }, [cart.paymentMethod, cart.shippingAddress.address, navigate]);
 
+  // 👇 HÀM XỬ LÝ ÁP DỤNG COUPON
+  const applyCouponHandler = async () => {
+    if (!couponCode.trim()) {
+      toast.error("Vui lòng nhập mã giảm giá");
+      return;
+    }
+    try {
+      const { data } = await axios.post("/api/coupons/validate", {
+        couponCode,
+      });
+      dispatch(saveCoupon(data)); // Lưu vào Redux
+      toast.success(
+        `Áp dụng mã ${data.code} giảm ${data.discount}% thành công!`
+      );
+      setCouponCode("");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Mã không hợp lệ");
+    }
+  };
+
+  // 👇 HÀM XỬ LÝ XÓA COUPON
+  const removeCouponHandler = () => {
+    dispatch(removeCoupon());
+    toast.info("Đã hủy mã giảm giá");
+  };
+
   const placeOrderHandler = async () => {
     try {
-      // Chuẩn bị Header chứa Token
       const config = {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${userInfo.token}`, // Lấy token từ biến userInfo đã khai báo ở trên
+          Authorization: `Bearer ${userInfo.token}`,
         },
       };
 
@@ -42,14 +76,15 @@ const PlaceOrderScreen = () => {
           shippingPrice: cart.shippingPrice,
           taxPrice: cart.taxPrice,
           totalPrice: cart.totalPrice,
+          // Có thể gửi thêm coupon code lên server để lưu lịch sử nếu muốn
+          couponCode: cart.coupon ? cart.coupon.code : "",
         },
         config
       );
 
-      // Xóa giỏ hàng sau khi đặt thành công
       dispatch(clearCartItems());
-
-      // Chuyển hướng sang trang chi tiết đơn hàng
+      // Xóa luôn coupon sau khi đặt thành công
+      dispatch(removeCoupon());
       navigate(`/order/${data._id}`);
     } catch (error) {
       toast.error(error.response?.data?.message || error.message);
@@ -60,65 +95,42 @@ const PlaceOrderScreen = () => {
     <>
       <Row>
         <Col md={8}>
+          {/* ... (Phần Vận chuyển, Thanh toán, Sản phẩm giữ nguyên) ... */}
           <ListGroup variant="flush">
-            <ListGroup.Item>
-              <h2>Vận chuyển</h2>
-              <p>
-                <strong>Địa chỉ: </strong>
-                {cart.shippingAddress.address},
-              </p>
-            </ListGroup.Item>
-
-            <ListGroup.Item>
-              <h2>Thanh toán</h2>
-              <strong>Phương thức: </strong>
-              {cart.paymentMethod}
-            </ListGroup.Item>
-
+            {/* Copy lại code cũ của anh ở đây */}
             <ListGroup.Item>
               <h2>Sản phẩm đặt mua</h2>
-              {cart.cartItems.length === 0 ? (
-                <p>Giỏ hàng trống</p>
-              ) : (
-                <ListGroup variant="flush">
-                  {cart.cartItems.map((item, index) => (
-                    <ListGroup.Item key={index}>
-                      <Row>
-                        <Col md={1}>
-                          <Image
-                            src={item.image}
-                            alt={item.name}
-                            fluid
-                            rounded
-                          />
-                        </Col>
-                        <Col>
-                          <Link to={`/product/${item._id}`}>{item.name}</Link>
-                        </Col>
-                        <Col md={4}>
-                          {item.qty} x {item.price.toLocaleString("vi-VN")}đ ={" "}
-                          {(item.qty * item.price).toLocaleString("vi-VN")}đ
-                        </Col>
-                      </Row>
-                    </ListGroup.Item>
-                  ))}
-                </ListGroup>
-              )}
+              {/* ... */}
             </ListGroup.Item>
           </ListGroup>
         </Col>
+
         <Col md={4}>
           <Card>
             <ListGroup variant="flush">
               <ListGroup.Item>
                 <h2>Tổng đơn hàng</h2>
               </ListGroup.Item>
+
               <ListGroup.Item>
                 <Row>
                   <Col>Tiền hàng</Col>
                   <Col>{Number(cart.itemsPrice).toLocaleString("vi-VN")}đ</Col>
                 </Row>
               </ListGroup.Item>
+
+              {/* 👇 HIỂN THỊ DÒNG GIẢM GIÁ */}
+              <ListGroup.Item>
+                <Row>
+                  <Col>
+                    Giảm giá {cart.coupon ? `(${cart.coupon.discount}%)` : ""}
+                  </Col>
+                  <Col>
+                    -{Number(cart.discountAmount || 0).toLocaleString("vi-VN")}đ
+                  </Col>
+                </Row>
+              </ListGroup.Item>
+
               <ListGroup.Item>
                 <Row>
                   <Col>Phí Ship</Col>
@@ -143,6 +155,35 @@ const PlaceOrderScreen = () => {
                   </Col>
                 </Row>
               </ListGroup.Item>
+
+              {/* 👇 Ô NHẬP COUPON */}
+              <ListGroup.Item>
+                {cart.coupon ? (
+                  <div className="d-grid">
+                    <Button variant="danger" onClick={removeCouponHandler}>
+                      Bỏ mã {cart.coupon.code} (-{cart.coupon.discount}%)
+                    </Button>
+                  </div>
+                ) : (
+                  <InputGroup>
+                    <Form.Control
+                      type="text"
+                      placeholder="Nhập mã giảm giá"
+                      value={couponCode}
+                      onChange={(e) =>
+                        setCouponCode(e.target.value.toUpperCase())
+                      }
+                    />
+                    <Button
+                      variant="outline-primary"
+                      onClick={applyCouponHandler}
+                    >
+                      Áp dụng
+                    </Button>
+                  </InputGroup>
+                )}
+              </ListGroup.Item>
+
               <ListGroup.Item>
                 <Button
                   type="button"
