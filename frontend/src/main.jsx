@@ -24,13 +24,17 @@ import LoginScreen from "./screens/LoginScreen.jsx";
 import RegisterScreen from "./screens/RegisterScreen.jsx";
 import ProfileScreen from "./screens/ProfileScreen.jsx";
 import OrderHistoryScreen from "./screens/OrderHistoryScreen.jsx";
+import AdminLoginScreen from "./screens/admin/AdminLoginScreen.jsx";
+import ProductListScreen from "./screens/admin/ProductListScreen.jsx";
+import ProductEditScreen from "./screens/admin/ProductEditScreen.jsx";
+import OrderListScreen from "./screens/admin/OrderListScreen.jsx";
+import AdminDashboardScreen from "./screens/admin/AdminDashboardScreen.jsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<App />}>
       <Route index={true} path="/" element={<HomeScreen />} />
       <Route path="/product/:id" element={<ProductScreen />} />
-      {/* Route Cart đã thêm trước đó, nếu chưa có thì thêm vào: */}
       <Route path="/cart" element={<CartScreen />} />
       <Route path="/login" element={<LoginScreen />} />
       <Route path="/register" element={<RegisterScreen />} />
@@ -40,6 +44,21 @@ const router = createBrowserRouter(
       <Route path="/payment" element={<PaymentScreen />} />
       <Route path="/placeorder" element={<PlaceOrderScreen />} />
       <Route path="/order/:id" element={<OrderScreen />} />
+
+      {/* Admin  */}
+      <Route path="/admin/login" element={<AdminLoginScreen />} />
+      <Route path="/admin/dashboard" element={<AdminDashboardScreen />} />
+      <Route path="/admin/productlist" element={<ProductListScreen />} />
+      <Route
+        path="/admin/productlist/:pageNumber"
+        element={<ProductListScreen />}
+      />
+      <Route path="/admin/product/:id/edit" element={<ProductEditScreen />} />
+      <Route path="/admin/orderlist" element={<OrderListScreen />} />
+      <Route
+        path="/admin/orderlist/:pageNumber"
+        element={<OrderListScreen />}
+      />
     </Route>
   )
 );

@@ -34,7 +34,8 @@ app.get("/", (req, res) => {
 
 app.use("/api/products", productRoutes);
 app.use("/api/users", userRoutes);
-app.use("/api/admins", adminRoutes);
+// app.use("/api/admins", adminRoutes);
+app.use("/api/admin", adminRoutes);
 app.use("/api/orders", orderRoutes); // <-- Mới
 app.use("/api/upload", uploadRoutes);
 app.use("/api/coupons", couponRoutes);

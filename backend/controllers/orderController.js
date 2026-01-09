@@ -105,7 +105,6 @@ const updateOrderToDelivered = asyncHandler(async (req, res) => {
 
   if (order) {
     order.isDelivered = true;
-    order.deliveryStatus = "Delivered";
     order.deliveredAt = Date.now();
 
     const updatedOrder = await order.save();
@@ -128,8 +127,18 @@ const getMyOrders = asyncHandler(async (req, res) => {
 // @route   GET /api/orders
 // @access  Private/Admin
 const getOrders = asyncHandler(async (req, res) => {
-  const orders = await Order.find({}).populate("user", "id name");
-  res.json(orders);
+  const pageSize = 10; // Đơn hàng thì nên hiển thị nhiều hơn chút
+  const page = Number(req.query.pageNumber) || 1;
+
+  const count = await Order.countDocuments({});
+
+  const orders = await Order.find({})
+    .populate("user", "id name")
+    .limit(pageSize)
+    .skip(pageSize * (page - 1))
+    .sort({ createdAt: -1 }); // Sắp xếp mới nhất lên đầu
+
+  res.json({ orders, page, pages: Math.ceil(count / pageSize) });
 });
 
 export {

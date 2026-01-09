@@ -1,6 +1,6 @@
 import { useEffect } from "react"; // 👈 Nhớ import useEffect
 import { Container } from "react-bootstrap";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Header from "./components/Header";
@@ -11,6 +11,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setCart } from "./slices/cartSlice";
 
 const App = () => {
+  const location = useLocation();
   const dispatch = useDispatch();
   const { userInfo } = useSelector((state) => state.auth);
   const cart = useSelector((state) => state.cart);
@@ -68,16 +69,16 @@ const App = () => {
       localStorage.setItem("cart", JSON.stringify(cart));
     }
   }, [cart, userInfo]);
-
+const isAdminRoute = location.pathname.startsWith("/admin");
   return (
     <>
-      <Header />
+      {!isAdminRoute && <Header />}
       <main className="py-3">
         <Container>
           <Outlet />
         </Container>
       </main>
-      <Footer />
+      {!isAdminRoute && <Footer />}
       <ToastContainer />
     </>
   );

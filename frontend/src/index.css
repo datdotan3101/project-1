@@ -1,3 +1,23 @@
+.product-title {
+  height: 2.5em; /* Chiều cao cố định cho khoảng 2 dòng chữ */
+  line-height: 1.25em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* Số dòng muốn hiển thị tối đa */
+  -webkit-box-orient: vertical;
+  color: #333; /* Màu chữ */
+  margin-bottom: 0.5rem;
+}
+
+/* Hiệu ứng hover cho thẻ Card thêm sinh động (Tùy chọn) */
+.card:hover {
+  transform: translateY(-5px);
+  transition: 0.3s;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+}
+
+
 /* :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
